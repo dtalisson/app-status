@@ -86,11 +86,20 @@ app.get('/api/status/stream', (req, res) => {
   });
 });
 
-// --- Servir frontend React compilado (build) ---
-// Em produção, o React é compilado para a pasta ../build (raiz do projeto).
-// Este bloco faz o Node servir tanto a API quanto o frontend na MESMA porta.
+// --- Raiz: JSON para app (Accept: application/json), HTML para navegador ---
+// App C++ chama GET / e espera JSON; navegador abre / e espera a página.
 const buildPath = path.join(__dirname, '../build');
 
+app.get('/', (req, res) => {
+  const accept = (req.get('Accept') || '').toLowerCase();
+  if (accept.includes('application/json')) {
+    res.set('Content-Type', 'application/json');
+    return res.status(200).json(statusState);
+  }
+  res.sendFile(path.join(buildPath, 'index.html'));
+});
+
+// --- Servir frontend React compilado (build) ---
 app.use(express.static(buildPath));
 
 // Qualquer rota que NÃO comece com /api cai no index.html do React
