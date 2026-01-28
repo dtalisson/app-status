@@ -1,0 +1,309 @@
+.purchase-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.purchase-modal-container {
+  background: rgba(15, 15, 15, 0.98);
+  border: 1px solid rgba(8, 164, 247, 0.3);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+.purchase-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid rgba(8, 164, 247, 0.2);
+}
+
+.purchase-modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.purchase-modal-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(8, 164, 247, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.purchase-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(8, 164, 247, 0.5);
+  color: #fff;
+}
+
+.purchase-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.purchase-modal-image {
+  width: 100%;
+  min-height: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(8, 164, 247, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.purchase-modal-image img {
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+}
+
+.purchase-modal-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+}
+
+.purchase-modal-tutorial-text {
+  width: 100%;
+  min-height: 500px;
+  max-height: 70vh;
+  padding: 24px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.purchase-modal-tutorial-text h3 {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(8, 164, 247, 0.3);
+}
+
+.tutorial-content {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-line;
+  word-wrap: break-word;
+  margin-bottom: 20px;
+}
+
+.tutorial-download-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(8, 164, 247, 0.3);
+}
+
+.tutorial-download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.tutorial-download-link:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.purchase-modal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0;
+}
+
+.purchase-product-name {
+  margin-bottom: 8px;
+}
+
+.purchase-product-name h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.purchase-plan-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(8, 164, 247, 0.1);
+  border: 1px solid rgba(8, 164, 247, 0.3);
+  border-radius: 8px;
+  color: #08a4f7;
+  font-size: 14px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.purchase-key-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.purchase-key-section label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.purchase-key-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(8, 164, 247, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.purchase-key-code {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  color: #08a4f7;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 0;
+  background: transparent;
+}
+
+.purchase-copy-key-btn {
+  background: rgba(8, 164, 247, 0.1);
+  border: 1px solid rgba(8, 164, 247, 0.3);
+  color: #08a4f7;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.purchase-copy-key-btn:hover {
+  background: rgba(8, 164, 247, 0.2);
+  border-color: #08a4f7;
+  transform: scale(1.05);
+}
+
+.purchase-action-section {
+  display: flex;
+  gap: 12px;
+}
+
+.purchase-action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  width: 100%;
+  justify-content: center;
+}
+
+.tutorial-btn {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #8b5cf6;
+}
+
+.tutorial-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.download-btn {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.download-btn:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+@media (max-width: 768px) {
+  .purchase-modal-container {
+    max-width: 100%;
+    margin: 10px;
+  }
+
+  .purchase-modal-body {
+    padding: 20px;
+  }
+
+  .purchase-modal-image {
+    min-height: 400px;
+  }
+
+  .purchase-modal-image img {
+    max-height: 60vh;
+  }
+
+  .purchase-modal-tutorial-text {
+    min-height: 400px;
+    max-height: 60vh;
+  }
+}
+
