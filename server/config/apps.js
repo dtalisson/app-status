@@ -9,6 +9,9 @@ const APPS = {
       min_version: '1.0.0',
       maintenance: false,
       message: 'Aplicação está online e atualizada.',
+      message_online: 'Aplicação está online e atualizada.',
+      message_offline: 'Aplicação offline para atualização.',
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.',
       release_notes: 'Versão inicial'
     }
   },
@@ -21,6 +24,9 @@ const APPS = {
       min_version: '1.0.0',
       maintenance: false,
       message: 'Aplicação está online e atualizada.',
+      message_online: 'Aplicação está online e atualizada.',
+      message_offline: 'Aplicação offline para atualização.',
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.',
       release_notes: 'Versão inicial'
     }
   },
@@ -33,6 +39,9 @@ const APPS = {
       min_version: '1.0.0',
       maintenance: false,
       message: 'Aplicação está online e atualizada.',
+      message_online: 'Aplicação está online e atualizada.',
+      message_offline: 'Aplicação offline para atualização.',
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.',
       release_notes: 'Versão inicial'
     }
   },
@@ -45,6 +54,9 @@ const APPS = {
       min_version: '1.0.0',
       maintenance: false,
       message: 'Aplicação está online e atualizada.',
+      message_online: 'Aplicação está online e atualizada.',
+      message_offline: 'Aplicação offline para atualização.',
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.',
       release_notes: 'Versão inicial'
     }
   }

@@ -97,6 +97,14 @@ statusRouter.get('/:appId', async (req, res) => {
     const statuses = await loadAppStatuses();
     let appStatus = statuses[appId] || { ...APPS[appId].defaultStatus };
 
+    // Definir "message" conforme o status atual (para clientes que leem só message)
+    const status = appStatus.status || 'online';
+    if (status === 'online') {
+      appStatus = { ...appStatus, message: appStatus.message_online ?? appStatus.message ?? '' };
+    } else {
+      appStatus = { ...appStatus, message: appStatus.message_offline ?? appStatus.message ?? '' };
+    }
+
     res.json(appStatus);
   } catch (err) {
     console.error('Erro ao buscar status:', err);
@@ -116,7 +124,7 @@ statusRouter.post('/:appId', async (req, res) => {
     const currentStatus = statuses[appId] || { ...APPS[appId].defaultStatus };
 
     // Campos permitidos para atualização
-    const allowedFields = ['status', 'current_version', 'min_version', 'maintenance', 'message', 'release_notes'];
+    const allowedFields = ['status', 'current_version', 'min_version', 'maintenance', 'message', 'message_online', 'message_offline', 'message_update_required', 'release_notes'];
     const updates = {};
 
     allowedFields.forEach(field => {
@@ -127,6 +135,12 @@ statusRouter.post('/:appId', async (req, res) => {
 
     // Atualizar status
     const newStatus = { ...currentStatus, ...updates };
+
+    // Definir "message" conforme o status (para resposta e clientes que leem só message)
+    const status = newStatus.status || 'online';
+    newStatus.message = status === 'online'
+      ? (newStatus.message_online ?? newStatus.message ?? '')
+      : (newStatus.message_offline ?? newStatus.message ?? '');
 
     statuses[appId] = newStatus;
     await saveAppStatuses(statuses);

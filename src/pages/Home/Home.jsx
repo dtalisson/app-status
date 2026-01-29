@@ -17,6 +17,8 @@ const Home = () => {
   const [errorByApp, setErrorByApp] = useState({});
   const [editingVersions, setEditingVersions] = useState({});
   const [versionInputs, setVersionInputs] = useState({});
+  const [editingMessages, setEditingMessages] = useState({});
+  const [messageInputs, setMessageInputs] = useState({});
 
   // Buscar status inicial de todas as aplicações usando novo endpoint
   useEffect(() => {
@@ -36,6 +38,14 @@ const Home = () => {
           [appKey]: {
             current_version: data.current_version || '1.0.0',
             min_version: data.min_version || '1.0.0',
+          },
+        }));
+        setMessageInputs((prev) => ({
+          ...prev,
+          [appKey]: {
+            message_online: data.message_online || data.message || 'Aplicação está online e atualizada.',
+            message_offline: data.message_offline || 'Aplicação offline para atualização.',
+            message_update_required: data.message_update_required || 'Nova versão disponível. Atualize o aplicativo.',
           },
         }));
       } catch (err) {
@@ -67,13 +77,7 @@ const Home = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
         },
-        body: JSON.stringify({
-          status: newStatus,
-          message:
-            newStatus === 'online'
-              ? 'Aplicação está online e atualizada.'
-              : 'Aplicação offline para atualização.',
-        }),
+        body: JSON.stringify({ status: newStatus }),
       });
 
       const data = await res.json();
@@ -81,16 +85,10 @@ const Home = () => {
         throw new Error(data.error || 'Erro ao atualizar status');
       }
 
+      const updated = data.status || { ...currentStatus, status: newStatus };
       setStatusByApp((prev) => ({
         ...prev,
-        [appKey]: {
-          ...(prev[appKey] || {}),
-          status: newStatus,
-          message:
-            newStatus === 'online'
-              ? 'Aplicação está online e atualizada.'
-              : 'Aplicação offline para atualização.',
-        },
+        [appKey]: updated,
       }));
     } catch (err) {
       console.error('Erro ao atualizar /api/status:', err);
@@ -156,6 +154,59 @@ const Home = () => {
       setErrorByApp((prev) => ({
         ...prev,
         [appKey]: 'Erro ao atualizar versões.',
+      }));
+    } finally {
+      setUpdatingByApp((prev) => ({ ...prev, [appKey]: false }));
+    }
+  };
+
+  const handleUpdateMessages = async (app) => {
+    const appKey = app.key;
+    const messages = messageInputs[appKey];
+    if (!messages) return;
+
+    setUpdatingByApp((prev) => ({ ...prev, [appKey]: true }));
+    setErrorByApp((prev) => ({ ...prev, [appKey]: '' }));
+
+    try {
+      const res = await fetch(`/api/status/${app.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message_online: messages.message_online,
+          message_offline: messages.message_offline,
+          message_update_required: messages.message_update_required,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || 'Erro ao atualizar mensagens');
+      }
+
+      const statusRes = await fetch(`/api/status/${app.id}`);
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        setStatusByApp((prev) => ({ ...prev, [appKey]: statusData }));
+        setMessageInputs((prev) => ({
+          ...prev,
+          [appKey]: {
+            message_online: statusData.message_online || statusData.message || '',
+            message_offline: statusData.message_offline || '',
+            message_update_required: statusData.message_update_required || '',
+          },
+        }));
+      }
+
+      setEditingMessages((prev) => ({ ...prev, [appKey]: false }));
+      alert('Mensagens atualizadas com sucesso!');
+    } catch (err) {
+      console.error('Erro ao atualizar mensagens:', err);
+      setErrorByApp((prev) => ({
+        ...prev,
+        [appKey]: 'Erro ao atualizar mensagens.',
       }));
     } finally {
       setUpdatingByApp((prev) => ({ ...prev, [appKey]: false }));
@@ -302,6 +353,125 @@ const Home = () => {
                           }}
                         >
                           Editar Versões
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Mensagens (Online, Offline, Versão desatualizada) */}
+                  <div className="home-status-messages">
+                    {editingMessages[appKey] ? (
+                      <div className="message-edit-form">
+                        <div className="message-input-group">
+                          <label>Mensagem quando Online:</label>
+                          <input
+                            type="text"
+                            value={messageInputs[appKey]?.message_online ?? ''}
+                            onChange={(e) =>
+                              setMessageInputs((prev) => ({
+                                ...prev,
+                                [appKey]: { ...prev[appKey], message_online: e.target.value },
+                              }))
+                            }
+                            className="message-input"
+                            placeholder="Aplicação está online e atualizada."
+                          />
+                        </div>
+                        <div className="message-input-group">
+                          <label>Mensagem quando Offline:</label>
+                          <input
+                            type="text"
+                            value={messageInputs[appKey]?.message_offline ?? ''}
+                            onChange={(e) =>
+                              setMessageInputs((prev) => ({
+                                ...prev,
+                                [appKey]: { ...prev[appKey], message_offline: e.target.value },
+                              }))
+                            }
+                            className="message-input"
+                            placeholder="Aplicação offline para atualização."
+                          />
+                        </div>
+                        <div className="message-input-group">
+                          <label>Mensagem versão desatualizada:</label>
+                          <input
+                            type="text"
+                            value={messageInputs[appKey]?.message_update_required ?? ''}
+                            onChange={(e) =>
+                              setMessageInputs((prev) => ({
+                                ...prev,
+                                [appKey]: { ...prev[appKey], message_update_required: e.target.value },
+                              }))
+                            }
+                            className="message-input"
+                            placeholder="Nova versão disponível. Atualize o aplicativo."
+                          />
+                        </div>
+                        <div className="message-actions">
+                          <button
+                            className="btn-message-save"
+                            onClick={() => handleUpdateMessages(app)}
+                            disabled={isUpdating}
+                          >
+                            Salvar
+                          </button>
+                          <button
+                            className="btn-message-cancel"
+                            onClick={() => {
+                              setEditingMessages((prev) => ({ ...prev, [appKey]: false }));
+                              if (appStatus) {
+                                setMessageInputs((prev) => ({
+                                  ...prev,
+                                  [appKey]: {
+                                    message_online: appStatus.message_online || appStatus.message || '',
+                                    message_offline: appStatus.message_offline || '',
+                                    message_update_required: appStatus.message_update_required || '',
+                                  },
+                                }));
+                              }
+                            }}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="message-display">
+                        <div className="message-item">
+                          <span className="message-label">Online:</span>
+                          <span className="message-value" title={appStatus?.message_online || appStatus?.message}>
+                            {appStatus?.message_online || appStatus?.message || '—'}
+                          </span>
+                        </div>
+                        <div className="message-item">
+                          <span className="message-label">Offline:</span>
+                          <span className="message-value" title={appStatus?.message_offline}>
+                            {appStatus?.message_offline || '—'}
+                          </span>
+                        </div>
+                        <div className="message-item">
+                          <span className="message-label">Versão desatualizada:</span>
+                          <span className="message-value" title={appStatus?.message_update_required}>
+                            {appStatus?.message_update_required || '—'}
+                          </span>
+                        </div>
+                        <button
+                          className="btn-message-edit"
+                          onClick={() => {
+                            setEditingMessages((prev) => ({ ...prev, [appKey]: true }));
+                            if (appStatus) {
+                              setMessageInputs((prev) => ({
+                                ...prev,
+                                [appKey]: {
+                                  message_online: appStatus.message_online || appStatus.message || '',
+                                  message_offline: appStatus.message_offline || '',
+                                  message_update_required: appStatus.message_update_required || '',
+                                },
+                              }));
+                            }
+                          }}
+                        >
+                          Editar Mensagens
                         </button>
                       </div>
                     )}

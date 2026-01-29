@@ -2,11 +2,14 @@
   "slottedaimbot": {
     "status": "online",
     "current_version": "1.0.0",
-    "min_version": "1.0.0",
+    "min_version": "1.0.1",
     "maintenance": false,
-    "message": "Nova versão disponível: SlottedAim.exe",
+    "message": "Versão online e funcionando perfeitamente!",
     "download_url": "https://app-status-n3ki.onrender.com/downloads/slottedaimbot/SlottedAim.exe",
-    "release_notes": "Versão inicial"
+    "release_notes": "Versão inicial",
+    "message_online": "Versão online e funcionando perfeitamente!",
+    "message_offline": "Aplicação temporariamente desabilitada, abra um ticket!",
+    "message_update_required": "Nova versão disponível, abra um ticket!"
   },
   "valorant-aimbot-color": {
     "status": "online",
