@@ -112,7 +112,7 @@ const Apps = () => {
   };
 
   const handleDeleteFile = async (appId, filename) => {
-    if (!confirm(`Tem certeza que deseja deletar ${filename}?`)) return;
+    if (!window.confirm(`Tem certeza que deseja deletar ${filename}?`)) return;
 
     try {
       const token = localStorage.getItem('adminToken');

@@ -102,7 +102,7 @@ const Downloads = () => {
   };
 
   const handleDeleteFile = async (appId, filename) => {
-    if (!confirm(`Tem certeza que deseja deletar ${filename}?`)) return;
+    if (!window.confirm(`Tem certeza que deseja deletar ${filename}?`)) return;
 
     try {
       const res = await fetch(`/api/upload/${appId}/${filename}`, {
