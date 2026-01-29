@@ -100,6 +100,8 @@ const Home = () => {
   };
 
   const getApiUrl = (appId) => {
+    // Em produção (Render), usa window.location.origin
+    // Em desenvolvimento, também usa window.location.origin (proxy do React redireciona /api/*)
     const baseUrl = window.location.origin;
     return `${baseUrl}/api/status/${appId}`;
   };

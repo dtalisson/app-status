@@ -39,21 +39,19 @@ const updateStatusObject = (target, updates) => {
 // Clientes conectados via SSE
 const statusClients = new Set();
 
-// --- Endpoints de status simples ---
+// --- Rotas de aplicações e downloads (DEVEM VIR ANTES DAS ROTAS ESPECÍFICAS) ---
+const appsRouter = require('./routes/apps');
+const downloadsRouter = require('./routes/downloads');
+const appUploadRouter = require('./routes/app-upload');
 
-// GET /api/status
-// Se ?app=valorant, retorna o status SOMENTE dessa aplicação.
-// Sem ?app, retorna o status global (compatível com implementação antiga).
-app.get('/api/status', (req, res) => {
-  try {
-    const appName = req.query.app;
-    const state = getAppStatus(appName);
-    res.json(state);
-  } catch (err) {
-    console.error('Erro em GET /api/status:', err);
-    res.status(500).json({ error: 'Erro interno' });
-  }
-});
+// Rotas de aplicações
+app.use('/api/apps', appsRouter);
+// Rotas de status com :appId (DEVEM VIR ANTES das rotas sem parâmetros)
+app.use('/api/status', appsRouter.statusRouter);
+app.use('/downloads', downloadsRouter);
+app.use('/api/upload', appUploadRouter);
+
+// --- Endpoints de status simples (rotas específicas sem parâmetros) ---
 
 // GET /api/status/frontend — status da aplicação frontend (React)
 app.get('/api/status/frontend', (req, res) => {
@@ -72,7 +70,43 @@ app.get('/api/status/frontend', (req, res) => {
   }
 });
 
-// POST /api/status (admin simples, sem auth)
+// SSE: GET /api/status/stream
+app.get('/api/status/stream', (req, res) => {
+  // Headers SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders && res.flushHeaders();
+
+  // Enviar estado atual imediatamente
+  res.write(`data: ${JSON.stringify(statusState)}\n\n`);
+
+  const client = { id: Date.now(), res };
+  statusClients.add(client);
+
+  console.log(`[SSE] Cliente conectado (${client.id}). Total: ${statusClients.size}`);
+
+  req.on('close', () => {
+    statusClients.delete(client);
+    console.log(`[SSE] Cliente desconectado (${client.id}). Total: ${statusClients.size}`);
+  });
+});
+
+// GET /api/status (sem parâmetros - compatibilidade)
+// Se ?app=valorant, retorna o status SOMENTE dessa aplicação.
+// Sem ?app, retorna o status global (compatível com implementação antiga).
+app.get('/api/status', (req, res) => {
+  try {
+    const appName = req.query.app;
+    const state = getAppStatus(appName);
+    res.json(state);
+  } catch (err) {
+    console.error('Erro em GET /api/status:', err);
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
+
+// POST /api/status (sem parâmetros - compatibilidade)
 // Se ?app=valorant, atualiza SOMENTE essa aplicação.
 // Sem ?app, atualiza o status global (compatível com implementação antiga).
 app.post('/api/status', (req, res) => {
@@ -118,38 +152,6 @@ app.post('/api/status', (req, res) => {
     res.status(500).json({ ok: false, error: 'Erro interno' });
   }
 });
-
-// SSE: GET /api/status/stream
-app.get('/api/status/stream', (req, res) => {
-  // Headers SSE
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders && res.flushHeaders();
-
-  // Enviar estado atual imediatamente
-  res.write(`data: ${JSON.stringify(statusState)}\n\n`);
-
-  const client = { id: Date.now(), res };
-  statusClients.add(client);
-
-  console.log(`[SSE] Cliente conectado (${client.id}). Total: ${statusClients.size}`);
-
-  req.on('close', () => {
-    statusClients.delete(client);
-    console.log(`[SSE] Cliente desconectado (${client.id}). Total: ${statusClients.size}`);
-  });
-});
-
-// --- Rotas de aplicações e downloads ---
-const appsRouter = require('./routes/apps');
-const downloadsRouter = require('./routes/downloads');
-const appUploadRouter = require('./routes/app-upload');
-
-// Rotas de aplicações
-app.use('/api/apps', appsRouter);
-// Rotas de status (GET /api/status/:appId e POST /api/status/:appId)
-app.use('/api/status', appsRouter.statusRouter);
 app.use('/downloads', downloadsRouter);
 app.use('/api/upload', appUploadRouter);
 
@@ -167,11 +169,12 @@ app.get('/', (req, res) => {
 });
 
 // --- Servir frontend React compilado (build) ---
+// IMPORTANTE: Servir arquivos estáticos ANTES da rota catch-all
 app.use(express.static(buildPath));
 
-// Qualquer rota que NÃO comece com /api cai no index.html do React
-// Usamos uma regex porque o Express 5 não aceita mais '*' puro nas rotas.
-app.get(/^(?!\/api).*/, (_req, res) => {
+// Qualquer rota que NÃO comece com /api ou /downloads cai no index.html do React
+// Isso permite que o React Router gerencie as rotas do frontend
+app.get(/^(?!\/api|\/downloads).*/, (_req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
 
