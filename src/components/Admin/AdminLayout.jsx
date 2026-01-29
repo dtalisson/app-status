@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FaHome, FaBox, FaTags, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
+import { FaHome, FaBox, FaTags, FaSignOutAlt, FaBars, FaTimes, FaDesktop } from 'react-icons/fa';
 import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
@@ -19,6 +19,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/dashboard', label: 'Dashboard', icon: FaHome },
     { path: '/admin/produtos', label: 'Produtos', icon: FaBox },
     { path: '/admin/planos', label: 'Planos', icon: FaTags },
+    { path: '/admin/apps', label: 'Aplicações', icon: FaDesktop },
   ];
 
   return (

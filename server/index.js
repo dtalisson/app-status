@@ -7,12 +7,33 @@ app.use(cors());
 app.use(express.json());
 
 // --- Estado em memória para /api/status ---
-let statusState = {
-  status: 'online',           // "online" ou "offline"
+// Estado "global" (sem aplicação específica)
+const defaultStatusState = {
+  status: 'online', // "online" ou "offline"
   current_version: '1.0.0',
   min_version: '1.0.0',
   maintenance: false,
   message: 'Aplicação está online e atualizada.',
+};
+
+let statusState = { ...defaultStatusState };
+
+// Estados por aplicação (ex.: valorant, cs2...)
+// Estrutura: { [appName]: StatusState }
+const appStatusStates = {};
+
+const getAppStatus = (appName) => {
+  const key = String(appName || '').toLowerCase();
+  if (!key) return statusState;
+
+  if (!appStatusStates[key]) {
+    appStatusStates[key] = { ...defaultStatusState };
+  }
+  return appStatusStates[key];
+};
+
+const updateStatusObject = (target, updates) => {
+  return { ...target, ...updates };
 };
 
 // Clientes conectados via SSE
@@ -21,16 +42,39 @@ const statusClients = new Set();
 // --- Endpoints de status simples ---
 
 // GET /api/status
-app.get('/api/status', (_req, res) => {
+// Se ?app=valorant, retorna o status SOMENTE dessa aplicação.
+// Sem ?app, retorna o status global (compatível com implementação antiga).
+app.get('/api/status', (req, res) => {
   try {
-    res.json(statusState);
+    const appName = req.query.app;
+    const state = getAppStatus(appName);
+    res.json(state);
   } catch (err) {
     console.error('Erro em GET /api/status:', err);
     res.status(500).json({ error: 'Erro interno' });
   }
 });
 
+// GET /api/status/frontend — status da aplicação frontend (React)
+app.get('/api/status/frontend', (req, res) => {
+  try {
+    const pkg = require('../package.json');
+    res.json({
+      status: 'online',
+      current_version: pkg.version || '1.0.0',
+      min_version: '1.0.0',
+      maintenance: false,
+      message: 'Frontend disponível e em execução.',
+    });
+  } catch (err) {
+    console.error('Erro em GET /api/status/frontend:', err);
+    res.status(500).json({ status: 'offline', message: 'Erro ao obter status do frontend.' });
+  }
+});
+
 // POST /api/status (admin simples, sem auth)
+// Se ?app=valorant, atualiza SOMENTE essa aplicação.
+// Sem ?app, atualiza o status global (compatível com implementação antiga).
 app.post('/api/status', (req, res) => {
   try {
     const allowedFields = ['status', 'current_version', 'min_version', 'maintenance', 'message'];
@@ -42,20 +86,31 @@ app.post('/api/status', (req, res) => {
       }
     });
 
-    statusState = { ...statusState, ...updates };
+    const appName = req.query.app;
 
-    console.log('[STATUS] Atualizado:', statusState);
+    if (appName) {
+      const key = String(appName).toLowerCase();
+      const current = getAppStatus(key);
+      const newState = updateStatusObject(current, updates);
+      appStatusStates[key] = newState;
+      console.log(`[STATUS] Atualizado (${key}):`, newState);
 
-    // Notificar todos os clientes SSE conectados
-    const payload = `data: ${JSON.stringify(statusState)}\n\n`;
-    statusClients.forEach((client) => {
-      try {
-        client.res.write(payload);
-      } catch (e) {
-        // Se falhar a escrita, remove o cliente
-        statusClients.delete(client);
-      }
-    });
+      // Por enquanto, SSE continua emitindo apenas o estado global
+    } else {
+      statusState = updateStatusObject(statusState, updates);
+      console.log('[STATUS] Atualizado (global):', statusState);
+
+      // Notificar todos os clientes SSE conectados com o estado global
+      const payload = `data: ${JSON.stringify(statusState)}\n\n`;
+      statusClients.forEach((client) => {
+        try {
+          client.res.write(payload);
+        } catch (e) {
+          // Se falhar a escrita, remove o cliente
+          statusClients.delete(client);
+        }
+      });
+    }
 
     res.json({ ok: true });
   } catch (err) {
@@ -85,6 +140,18 @@ app.get('/api/status/stream', (req, res) => {
     console.log(`[SSE] Cliente desconectado (${client.id}). Total: ${statusClients.size}`);
   });
 });
+
+// --- Rotas de aplicações e downloads ---
+const appsRouter = require('./routes/apps');
+const downloadsRouter = require('./routes/downloads');
+const appUploadRouter = require('./routes/app-upload');
+
+// Rotas de aplicações
+app.use('/api/apps', appsRouter);
+// Rotas de status (GET /api/status/:appId e POST /api/status/:appId)
+app.use('/api/status', appsRouter.statusRouter);
+app.use('/downloads', downloadsRouter);
+app.use('/api/upload', appUploadRouter);
 
 // --- Raiz: JSON para app (Accept: application/json), HTML para navegador ---
 // App C++ chama GET / e espera JSON; navegador abre / e espera a página.

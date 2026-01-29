@@ -6,12 +6,14 @@ import { CartProvider } from './context/CartContext';
 import PrivateRoute from './components/Admin/PrivateRoute';
 import Home from './pages/Home/Home';
 import Status from './pages/Status/Status';
+import Downloads from './pages/Downloads/Downloads';
 import AdminLogin from './pages/Admin/Login/Login';
 import AdminCallback from './pages/Admin/Callback/Callback';
 import AdminDashboard from './pages/Admin/Dashboard/Dashboard';
 import AdminProducts from './pages/Admin/Products/Products';
 import AdminPlans from './pages/Admin/Plans/Plans';
 import AdminProfile from './pages/Admin/Profile/Profile';
+import AdminApps from './pages/Admin/Apps/Apps';
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
           <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/status" element={<Status />} />
+          <Route path="/downloads" element={<Downloads />} />
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -54,6 +57,14 @@ function App() {
             element={
               <PrivateRoute>
                 <AdminProfile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/apps"
+            element={
+              <PrivateRoute>
+                <AdminApps />
               </PrivateRoute>
             }
           />

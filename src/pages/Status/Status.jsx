@@ -4,37 +4,93 @@ import Footer from '../../components/Footer/Footer';
 import { FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from 'react-icons/fa';
 import './Status.css';
 
-const Status = () => {
-  const [apiStatus, setApiStatus] = useState(null);
-  const [updating, setUpdating] = useState(false);
-  const [error, setError] = useState('');
+const applications = [
+  { id: '', key: 'global', label: 'Geral' },
+  { id: 'valorant', key: 'valorant', label: 'VALORANT' },
+  { id: 'cs2', key: 'cs2', label: 'CS2' },
+  { id: 'fortnite', key: 'fortnite', label: 'FORTNITE' },
+];
 
-  // Buscar status inicial do backend simples
+const Status = () => {
+  const [frontendStatus, setFrontendStatus] = useState(null);
+  const [backendStatus, setBackendStatus] = useState(null);
+  const [frontendError, setFrontendError] = useState('');
+  const [backendError, setBackendError] = useState('');
+  const [statusByApp, setStatusByApp] = useState({});
+  const [updatingByApp, setUpdatingByApp] = useState({});
+  const [errorByApp, setErrorByApp] = useState({});
+
+  const buildUrl = (appId) =>
+    appId ? `/api/status?app=${encodeURIComponent(appId)}` : '/api/status';
+
+  // Buscar status do Frontend e do Backend na mesma página
   useEffect(() => {
-    const fetchStatus = async () => {
+    const fetchFrontend = async () => {
+      setFrontendError('');
       try {
-        setError('');
+        const res = await fetch('/api/status/frontend');
+        if (!res.ok) throw new Error('Falha ao buscar status');
+        const data = await res.json();
+        setFrontendStatus(data);
+      } catch (err) {
+        console.error('Erro ao buscar /api/status/frontend:', err);
+        setFrontendError('Não foi possível carregar o status do frontend.');
+      }
+    };
+    const fetchBackend = async () => {
+      setBackendError('');
+      try {
         const res = await fetch('/api/status');
         if (!res.ok) throw new Error('Falha ao buscar status');
         const data = await res.json();
-        setApiStatus(data);
+        setBackendStatus(data);
       } catch (err) {
         console.error('Erro ao buscar /api/status:', err);
-        setError('Não foi possível carregar o status da API.');
+        setBackendError('Não foi possível carregar o status do backend.');
       }
     };
-
-    fetchStatus();
+    fetchFrontend();
+    fetchBackend();
   }, []);
 
-  const handleSelectChange = async (e) => {
-    const newStatus = e.target.value;
-    if (!apiStatus) return;
+  const fetchStatusForApp = async (app) => {
+    const appKey = app.key;
+    setErrorByApp((prev) => ({ ...prev, [appKey]: '' }));
+    setUpdatingByApp((prev) => ({ ...prev, [appKey]: true }));
 
-    setUpdating(true);
-    setError('');
     try {
-      const res = await fetch('/api/status', {
+      const res = await fetch(buildUrl(app.id));
+      if (!res.ok) throw new Error('Falha ao buscar status');
+      const data = await res.json();
+      setStatusByApp((prev) => ({ ...prev, [appKey]: data }));
+    } catch (err) {
+      console.error('Erro ao buscar /api/status:', err);
+      setErrorByApp((prev) => ({
+        ...prev,
+        [appKey]: 'Não foi possível carregar o status.',
+      }));
+    } finally {
+      setUpdatingByApp((prev) => ({ ...prev, [appKey]: false }));
+    }
+  };
+
+  useEffect(() => {
+    applications.forEach((app) => {
+      fetchStatusForApp(app);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleChangeStatus = async (app, newStatus) => {
+    const appKey = app.key;
+    const currentStatus = statusByApp[appKey];
+    if (!currentStatus) return;
+
+    setUpdatingByApp((prev) => ({ ...prev, [appKey]: true }));
+    setErrorByApp((prev) => ({ ...prev, [appKey]: '' }));
+
+    try {
+      const res = await fetch(buildUrl(app.id), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,87 +109,169 @@ const Status = () => {
         throw new Error(data.error || 'Erro ao atualizar status');
       }
 
-      // Atualizar estado local para refletir alteração
-      setApiStatus((prev) => ({
-        ...(prev || {}),
-        status: newStatus,
-        message:
-          newStatus === 'online'
-            ? 'Aplicação está online e atualizada.'
-            : 'Aplicação offline para atualização.',
+      setStatusByApp((prev) => ({
+        ...prev,
+        [appKey]: {
+          ...(prev[appKey] || {}),
+          status: newStatus,
+          message:
+            newStatus === 'online'
+              ? 'Aplicação está online e atualizada.'
+              : 'Aplicação offline para atualização.',
+        },
       }));
     } catch (err) {
       console.error('Erro ao atualizar /api/status:', err);
-      setError('Erro ao atualizar status.');
+      setErrorByApp((prev) => ({
+        ...prev,
+        [appKey]: 'Erro ao atualizar status.',
+      }));
     } finally {
-      setUpdating(false);
+      setUpdatingByApp((prev) => ({ ...prev, [appKey]: false }));
     }
   };
 
-  const [services] = useState([
-    { name: 'Website', status: 'operational', uptime: '99.9%' },
-    { name: 'API Backend', status: 'operational', uptime: '99.8%' },
-    { name: 'MongoDB Database', status: 'operational', uptime: '99.9%' },
-    { name: 'Payment Gateway', status: 'operational', uptime: '99.7%' },
-  ]);
+  const getStatusIcon = (status) => {
+    if (status === 'online') return <FaCheckCircle className="status-icon operational" />;
+    if (status === 'degraded') return <FaExclamationTriangle className="status-icon degraded" />;
+    return <FaTimesCircle className="status-icon down" />;
+  };
 
   return (
     <div className="status-page">
       <Header />
       <div className="status-container">
         <div className="status-content">
-          {/* Controle simples do backend /api/status */}
           <div className="status-header">
-            <h1>Status do Sistema</h1>
-            <p>Controle rápido do endpoint <code>/api/status</code></p>
-            <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <label htmlFor="status-select">
-                Modo da aplicação:
-              </label>
-              <select
-                id="status-select"
-                value={apiStatus?.status || 'online'}
-                onChange={handleSelectChange}
-                disabled={!apiStatus || updating}
-              >
-                <option value="online">Online</option>
-                <option value="offline">Offline</option>
-              </select>
-              {updating && <span>Atualizando...</span>}
-            </div>
-            {apiStatus && (
-              <pre style={{ marginTop: '12px', background: '#111', padding: '8px 12px', borderRadius: '8px' }}>
-{JSON.stringify(apiStatus, null, 2)}
-              </pre>
-            )}
-            {error && <p style={{ color: '#ff6b6b', marginTop: '8px' }}>{error}</p>}
+            <h1>Status das Aplicações</h1>
+            <p>
+              Controle rápido do endpoint <code>/api/status</code> para cada jogo/app.
+            </p>
           </div>
 
-          <div className="status-grid">
-            {services.map((service, index) => (
-              <div key={index} className="status-card">
+          {/* Frontend e Backend na mesma página */}
+          <div className="status-stack">
+            <div className="status-stack-title">Sistema</div>
+            <div className="status-system-grid">
+              <div className="status-system-card">
                 <div className="status-card-header">
-                  <h3>{service.name}</h3>
-                  {service.status === 'operational' ? (
-                    <FaCheckCircle className="status-icon operational" />
-                  ) : service.status === 'degraded' ? (
-                    <FaExclamationTriangle className="status-icon degraded" />
+                  <h3>Frontend</h3>
+                  {frontendStatus ? (
+                    getStatusIcon(frontendStatus.status)
                   ) : (
-                    <FaTimesCircle className="status-icon down" />
+                    <span className="status-badge down">Carregando...</span>
                   )}
                 </div>
                 <div className="status-card-body">
-                  <div className="status-badge operational">
-                    {service.status === 'operational' ? 'Operacional' : 
-                     service.status === 'degraded' ? 'Degradado' : 'Indisponível'}
-                  </div>
-                  <div className="status-uptime">
-                    <span>Uptime:</span>
-                    <strong>{service.uptime}</strong>
-                  </div>
+                  {frontendError && (
+                    <p style={{ color: '#ff6b6b', fontSize: '12px', marginBottom: 8 }}>{frontendError}</p>
+                  )}
+                  {frontendStatus && (
+                    <pre
+                      style={{
+                        marginTop: 12,
+                        background: '#111',
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        fontSize: 11,
+                        maxHeight: 180,
+                        overflow: 'auto',
+                      }}
+                    >
+                      {JSON.stringify(frontendStatus, null, 2)}
+                    </pre>
+                  )}
                 </div>
               </div>
-            ))}
+              <div className="status-system-card">
+                <div className="status-card-header">
+                  <h3>Backend</h3>
+                  {backendStatus ? (
+                    getStatusIcon(backendStatus.status)
+                  ) : (
+                    <span className="status-badge down">Carregando...</span>
+                  )}
+                </div>
+                <div className="status-card-body">
+                  {backendError && (
+                    <p style={{ color: '#ff6b6b', fontSize: '12px', marginBottom: 8 }}>{backendError}</p>
+                  )}
+                  {backendStatus && (
+                    <pre
+                      style={{
+                        marginTop: 12,
+                        background: '#111',
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        fontSize: 11,
+                        maxHeight: 180,
+                        overflow: 'auto',
+                      }}
+                    >
+                      {JSON.stringify(backendStatus, null, 2)}
+                    </pre>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="status-grid">
+            {applications.map((app) => {
+              const appKey = app.key;
+              const appStatus = statusByApp[appKey];
+              const isUpdating = !!updatingByApp[appKey];
+              const error = errorByApp[appKey];
+              const currentMode = appStatus?.status || 'online';
+
+              return (
+                <div key={appKey} className="status-card">
+                  <div className="status-card-header">
+                    <h3>{app.label}</h3>
+                    {getStatusIcon(currentMode)}
+                  </div>
+                  <div className="status-card-body">
+                    <div className={`status-badge ${currentMode === 'online' ? 'operational' : 'down'}`}>
+                      {currentMode === 'online' ? 'Online' : 'Offline'}
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label htmlFor={`status-select-${appKey}`}>Modo:</label>
+                      <select
+                        id={`status-select-${appKey}`}
+                        value={currentMode}
+                        onChange={(e) => handleChangeStatus(app, e.target.value)}
+                        disabled={!appStatus || isUpdating}
+                      >
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                      </select>
+                      {isUpdating && <span>Atualizando...</span>}
+                    </div>
+
+                    {appStatus && (
+                      <pre
+                        style={{
+                          marginTop: '12px',
+                          background: '#111',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          fontSize: '11px',
+                          maxHeight: '150px',
+                          overflow: 'auto',
+                        }}
+                      >
+{JSON.stringify(appStatus, null, 2)}
+                      </pre>
+                    )}
+
+                    {error && (
+                      <p style={{ color: '#ff6b6b', marginTop: '8px', fontSize: '12px' }}>{error}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="status-history">

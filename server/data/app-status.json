@@ -1,0 +1,38 @@
+{
+  "slottedaimbot": {
+    "status": "online",
+    "current_version": "1.0.0",
+    "min_version": "1.0.0",
+    "maintenance": true,
+    "message": "Aplicação está online e atualizada.",
+    "download_url": "",
+    "release_notes": "Versão inicial"
+  },
+  "valorant-aimbot-color": {
+    "status": "online",
+    "current_version": "1.0.0",
+    "min_version": "1.0.0",
+    "maintenance": false,
+    "message": "Aplicação está online e atualizada.",
+    "download_url": "",
+    "release_notes": "Versão inicial"
+  },
+  "cs2-elevate": {
+    "status": "online",
+    "current_version": "1.0.0",
+    "min_version": "1.0.0",
+    "maintenance": false,
+    "message": "Aplicação está online e atualizada.",
+    "download_url": "",
+    "release_notes": "Versão inicial"
+  },
+  "vgc-bypass": {
+    "status": "online",
+    "current_version": "1.0.0",
+    "min_version": "1.0.0",
+    "maintenance": false,
+    "message": "Aplicação está online e atualizada.",
+    "download_url": "",
+    "release_notes": "Versão inicial"
+  }
+}
