@@ -117,6 +117,15 @@
   word-break: break-word;
 }
 
+.app-id-display {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: monospace;
+  font-weight: 400;
+  display: block;
+  margin-top: 2px;
+}
+
 .home-status-card-title .app-name {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.6);
@@ -275,80 +284,137 @@
   font-size: 14px;
 }
 
-.home-status-api-section {
+.home-status-versions {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.api-url-display {
+.version-display {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(8, 164, 247, 0.1);
-  border: 1px solid rgba(8, 164, 247, 0.2);
-  border-radius: 6px;
-  padding: 8px 10px;
-  margin-bottom: 10px;
-}
-
-.api-icon {
-  color: #08a4f7;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.api-url-text {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.9);
-  font-family: 'Courier New', 'Monaco', monospace;
-  word-break: break-all;
-  flex: 1;
-}
-
-.api-actions {
-  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.btn-api-copy,
-.btn-api-open {
-  flex: 1;
+.version-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 6px;
   font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  outline: none;
 }
 
-.btn-api-copy {
+.version-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.version-value {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.btn-version-edit {
+  margin-top: 4px;
   background: rgba(8, 164, 247, 0.15);
   border: 1px solid rgba(8, 164, 247, 0.3);
   color: #08a4f7;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: 100%;
 }
 
-.btn-api-copy:hover {
+.btn-version-edit:hover {
   background: rgba(8, 164, 247, 0.25);
   border-color: rgba(8, 164, 247, 0.5);
 }
 
-.btn-api-open {
+.version-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.version-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.version-input-group label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.version-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: #fff;
+  font-size: 12px;
+  font-family: monospace;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.version-input:focus {
+  border-color: rgba(8, 164, 247, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.version-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.btn-version-save {
+  flex: 1;
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.3);
   color: #10b981;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.btn-api-open:hover {
+.btn-version-save:hover:not(:disabled) {
   background: rgba(16, 185, 129, 0.25);
   border-color: rgba(16, 185, 129, 0.5);
 }
+
+.btn-version-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-version-cancel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-version-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
 
 @media (max-width: 768px) {
   .home-status-container {
