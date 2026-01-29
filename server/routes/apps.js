@@ -62,10 +62,18 @@ const getLatestFile = async (appId) => {
   }
 };
 
-// Construir download URL
-const buildDownloadUrl = (appId, filename) => {
-  const baseUrl = getBaseUrl();
-  return `${baseUrl}/downloads/${appId}/${filename}`;
+// Utilitário simples para comparar versões no formato X.Y.Z
+const compareVersions = (v1 = '', v2 = '') => {
+  const a = String(v1).split('.').map((n) => parseInt(n, 10) || 0);
+  const b = String(v2).split('.').map((n) => parseInt(n, 10) || 0);
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i += 1) {
+    const na = a[i] || 0;
+    const nb = b[i] || 0;
+    if (na > nb) return 1;
+    if (na < nb) return -1;
+  }
+  return 0;
 };
 
 // GET /api/apps - Lista todas as aplicações
@@ -97,12 +105,50 @@ statusRouter.get('/:appId', async (req, res) => {
     const statuses = await loadAppStatuses();
     let appStatus = statuses[appId] || { ...APPS[appId].defaultStatus };
 
-    // Definir "message" conforme o status atual (para clientes que leem só message)
-    const status = appStatus.status || 'online';
-    if (status === 'online') {
-      appStatus = { ...appStatus, message: appStatus.message_online ?? appStatus.message ?? '' };
+    // Remover campos obsoletos da resposta
+    delete appStatus.release_notes;
+    delete appStatus.download_url;
+
+    // Detectar se o cliente informou sua versão (?version= ou ?client_version=)
+    const clientVersion = req.query.version || req.query.client_version;
+    let updateRequired = false;
+
+    if (clientVersion) {
+      const current = appStatus.current_version;
+      const min = appStatus.min_version;
+
+      if (min && compareVersions(clientVersion, min) < 0) {
+        // Abaixo da versão mínima -> update obrigatório
+        updateRequired = true;
+      } else if (current && compareVersions(clientVersion, current) < 0) {
+        // Abaixo da versão atual -> update recomendado/necessário
+        updateRequired = true;
+      }
+    }
+
+    // Escolher mensagem correta
+    let effectiveMessage;
+    if (updateRequired) {
+      effectiveMessage =
+        appStatus.message_update_required ??
+        appStatus.message ??
+        'Nova versão disponível. Atualize o aplicativo.';
     } else {
-      appStatus = { ...appStatus, message: appStatus.message_offline ?? appStatus.message ?? '' };
+      const status = appStatus.status || 'online';
+      effectiveMessage =
+        status === 'online'
+          ? (appStatus.message_online ?? appStatus.message ?? '')
+          : (appStatus.message_offline ?? appStatus.message ?? '');
+    }
+
+    appStatus = {
+      ...appStatus,
+      message: effectiveMessage,
+    };
+
+    if (clientVersion) {
+      appStatus.update_required = updateRequired;
+      appStatus.client_version = clientVersion;
     }
 
     res.json(appStatus);
@@ -124,7 +170,7 @@ statusRouter.post('/:appId', async (req, res) => {
     const currentStatus = statuses[appId] || { ...APPS[appId].defaultStatus };
 
     // Campos permitidos para atualização
-    const allowedFields = ['status', 'current_version', 'min_version', 'maintenance', 'message', 'message_online', 'message_offline', 'message_update_required', 'release_notes'];
+    const allowedFields = ['status', 'current_version', 'min_version', 'maintenance', 'message', 'message_online', 'message_offline', 'message_update_required'];
     const updates = {};
 
     allowedFields.forEach(field => {
@@ -135,6 +181,10 @@ statusRouter.post('/:appId', async (req, res) => {
 
     // Atualizar status
     const newStatus = { ...currentStatus, ...updates };
+
+    // Limpar campos obsoletos
+    delete newStatus.release_notes;
+    delete newStatus.download_url;
 
     // Definir "message" conforme o status (para resposta e clientes que leem só message)
     const status = newStatus.status || 'online';

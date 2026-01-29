@@ -144,12 +144,6 @@ const AppStatusDisplay = ({ app }) => {
         <span className="status-label">Mensagem:</span>
         <span className="status-value">{status.message}</span>
       </div>
-      {status.release_notes && (
-        <div className="status-row">
-          <span className="status-label">Release Notes:</span>
-          <span className="status-value">{status.release_notes}</span>
-        </div>
-      )}
     </div>
   );
 };
@@ -160,8 +154,7 @@ const AppEditForm = ({ app, onSave, onCancel }) => {
     current_version: app.status.current_version,
     min_version: app.status.min_version,
     maintenance: app.status.maintenance,
-    message: app.status.message,
-    release_notes: app.status.release_notes || ''
+    message: app.status.message
   });
 
   const handleSubmit = (e) => {
@@ -219,16 +212,6 @@ const AppEditForm = ({ app, onSave, onCancel }) => {
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
           rows="3"
-        />
-      </div>
-
-      <div className="form-group">
-        <label>Release Notes:</label>
-        <textarea
-          value={formData.release_notes}
-          onChange={(e) => setFormData({ ...formData, release_notes: e.target.value })}
-          rows="2"
-          placeholder="v1.1.0 - Melhorias"
         />
       </div>
 

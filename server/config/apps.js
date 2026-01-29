@@ -11,8 +11,7 @@ const APPS = {
       message: 'Aplicação está online e atualizada.',
       message_online: 'Aplicação está online e atualizada.',
       message_offline: 'Aplicação offline para atualização.',
-      message_update_required: 'Nova versão disponível. Atualize o aplicativo.',
-      release_notes: 'Versão inicial'
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.'
     }
   },
   'valorant-aimbot-color': {
@@ -26,8 +25,7 @@ const APPS = {
       message: 'Aplicação está online e atualizada.',
       message_online: 'Aplicação está online e atualizada.',
       message_offline: 'Aplicação offline para atualização.',
-      message_update_required: 'Nova versão disponível. Atualize o aplicativo.',
-      release_notes: 'Versão inicial'
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.'
     }
   },
   'cs2-elevate': {
@@ -41,8 +39,7 @@ const APPS = {
       message: 'Aplicação está online e atualizada.',
       message_online: 'Aplicação está online e atualizada.',
       message_offline: 'Aplicação offline para atualização.',
-      message_update_required: 'Nova versão disponível. Atualize o aplicativo.',
-      release_notes: 'Versão inicial'
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.'
     }
   },
   'vgc-bypass': {
@@ -56,8 +53,7 @@ const APPS = {
       message: 'Aplicação está online e atualizada.',
       message_online: 'Aplicação está online e atualizada.',
       message_offline: 'Aplicação offline para atualização.',
-      message_update_required: 'Nova versão disponível. Atualize o aplicativo.',
-      release_notes: 'Versão inicial'
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.'
     }
   }
 };
