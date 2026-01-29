@@ -9,7 +9,6 @@ const APPS = {
       min_version: '1.0.0',
       maintenance: false,
       message: 'Aplicação está online e atualizada.',
-      download_url: '',
       release_notes: 'Versão inicial'
     }
   },
@@ -22,7 +21,6 @@ const APPS = {
       min_version: '1.0.0',
       maintenance: false,
       message: 'Aplicação está online e atualizada.',
-      download_url: '',
       release_notes: 'Versão inicial'
     }
   },
@@ -35,7 +33,6 @@ const APPS = {
       min_version: '1.0.0',
       maintenance: false,
       message: 'Aplicação está online e atualizada.',
-      download_url: '',
       release_notes: 'Versão inicial'
     }
   },
@@ -48,7 +45,6 @@ const APPS = {
       min_version: '1.0.0',
       maintenance: false,
       message: 'Aplicação está online e atualizada.',
-      download_url: '',
       release_notes: 'Versão inicial'
     }
   }

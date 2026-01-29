@@ -2,15 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import ParticlesCanvas from '../../components/ParticlesCanvas/ParticlesCanvas';
-import { FaCheckCircle, FaTimesCircle, FaUpload, FaTrash, FaDownload, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaDownload, FaExclamationTriangle } from 'react-icons/fa';
 import './Downloads.css';
 
 const Downloads = () => {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingApp, setEditingApp] = useState(null);
-  const [uploading, setUploading] = useState({});
-  const [files, setFiles] = useState({});
 
   useEffect(() => {
     loadApps();
@@ -21,9 +19,6 @@ const Downloads = () => {
       const res = await fetch('/api/apps');
       const data = await res.json();
       setApps(data);
-      
-      // Carregar arquivos de cada aplicação
-      data.forEach(app => loadFiles(app.id));
     } catch (error) {
       console.error('Erro ao carregar aplicações:', error);
     } finally {
@@ -31,17 +26,6 @@ const Downloads = () => {
     }
   };
 
-  const loadFiles = async (appId) => {
-    try {
-      const res = await fetch(`/api/apps/${appId}/files`);
-      if (res.ok) {
-        const data = await res.json();
-        setFiles(prev => ({ ...prev, [appId]: data.files || [] }));
-      }
-    } catch (error) {
-      console.error(`Erro ao carregar arquivos de ${appId}:`, error);
-    }
-  };
 
   const handleUpdateStatus = async (appId, updates) => {
     try {
@@ -67,67 +51,6 @@ const Downloads = () => {
     }
   };
 
-  const handleFileUpload = async (appId, file) => {
-    if (!file || !file.name.endsWith('.exe')) {
-      alert('Apenas arquivos .exe são permitidos');
-      return;
-    }
-
-    setUploading(prev => ({ ...prev, [appId]: true }));
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch(`/api/upload/${appId}`, {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert('Arquivo enviado com sucesso!');
-        await loadFiles(appId);
-        await loadApps();
-      } else {
-        alert(data.error || 'Erro ao fazer upload');
-      }
-    } catch (error) {
-      console.error('Erro ao fazer upload:', error);
-      alert('Erro ao fazer upload');
-    } finally {
-      setUploading(prev => ({ ...prev, [appId]: false }));
-    }
-  };
-
-  const handleDeleteFile = async (appId, filename) => {
-    if (!window.confirm(`Tem certeza que deseja deletar ${filename}?`)) return;
-
-    try {
-      const res = await fetch(`/api/upload/${appId}/${filename}`, {
-        method: 'DELETE'
-      });
-
-      if (res.ok) {
-        await loadFiles(appId);
-        alert('Arquivo deletado com sucesso');
-      } else {
-        alert('Erro ao deletar arquivo');
-      }
-    } catch (error) {
-      console.error('Erro ao deletar arquivo:', error);
-      alert('Erro ao deletar arquivo');
-    }
-  };
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  };
 
   const getStatusIcon = (status) => {
     if (status === 'online') return <FaCheckCircle className="status-icon online" />;
@@ -184,63 +107,6 @@ const Downloads = () => {
                     </button>
                   </div>
 
-                  <div className="download-files-section">
-                    <h4>Arquivos Disponíveis</h4>
-                    <div className="file-upload">
-                      <label className="file-upload-label">
-                        <FaUpload /> Upload .exe
-                        <input
-                          type="file"
-                          accept=".exe"
-                          onChange={(e) => {
-                            if (e.target.files[0]) {
-                              handleFileUpload(app.id, e.target.files[0]);
-                            }
-                          }}
-                          disabled={uploading[app.id]}
-                          style={{ display: 'none' }}
-                        />
-                      </label>
-                      {uploading[app.id] && <span className="uploading">Enviando...</span>}
-                    </div>
-
-                    <div className="files-list">
-                      {files[app.id] && files[app.id].length > 0 ? (
-                        files[app.id].map((file, idx) => (
-                          <div key={idx} className="file-item">
-                            <div className="file-info">
-                              <FaDownload className="file-icon" />
-                              <div>
-                                <div className="file-name">{file.filename}</div>
-                                <div className="file-meta">
-                                  {formatFileSize(file.size)} • {new Date(file.modified).toLocaleDateString('pt-BR')}
-                                </div>
-                                {file.download_url && (
-                                  <a 
-                                    href={file.download_url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="download-link-btn"
-                                  >
-                                    <FaDownload /> Baixar
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                            <button
-                              className="btn-delete-file"
-                              onClick={() => handleDeleteFile(app.id, file.filename)}
-                              title="Deletar arquivo"
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="no-files">Nenhum arquivo disponível</div>
-                      )}
-                    </div>
-                  </div>
                 </>
               )}
             </div>
@@ -278,14 +144,6 @@ const AppStatusDisplay = ({ app }) => {
         <span className="status-label">Mensagem:</span>
         <span className="status-value">{status.message}</span>
       </div>
-      {status.download_url && (
-        <div className="status-row">
-          <span className="status-label">Download URL:</span>
-          <a href={status.download_url} target="_blank" rel="noopener noreferrer" className="download-link">
-            {status.download_url}
-          </a>
-        </div>
-      )}
       {status.release_notes && (
         <div className="status-row">
           <span className="status-label">Release Notes:</span>

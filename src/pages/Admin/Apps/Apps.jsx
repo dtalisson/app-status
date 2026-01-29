@@ -279,14 +279,6 @@ const AppStatusDisplay = ({ app }) => {
         <span className="status-label">Mensagem:</span>
         <span className="status-value">{status.message}</span>
       </div>
-      {status.download_url && (
-        <div className="status-row">
-          <span className="status-label">Download URL:</span>
-          <a href={status.download_url} target="_blank" rel="noopener noreferrer" className="download-link">
-            {status.download_url}
-          </a>
-        </div>
-      )}
       {status.release_notes && (
         <div className="status-row">
           <span className="status-label">Release Notes:</span>

@@ -97,14 +97,6 @@ statusRouter.get('/:appId', async (req, res) => {
     const statuses = await loadAppStatuses();
     let appStatus = statuses[appId] || { ...APPS[appId].defaultStatus };
 
-    // Se não tem download_url, tentar encontrar arquivo mais recente
-    if (!appStatus.download_url) {
-      const latestFile = await getLatestFile(appId);
-      if (latestFile) {
-        appStatus.download_url = buildDownloadUrl(appId, latestFile);
-      }
-    }
-
     res.json(appStatus);
   } catch (err) {
     console.error('Erro ao buscar status:', err);
@@ -135,14 +127,6 @@ statusRouter.post('/:appId', async (req, res) => {
 
     // Atualizar status
     const newStatus = { ...currentStatus, ...updates };
-
-    // Se não tem download_url, tentar encontrar arquivo mais recente
-    if (!newStatus.download_url) {
-      const latestFile = await getLatestFile(appId);
-      if (latestFile) {
-        newStatus.download_url = buildDownloadUrl(appId, latestFile);
-      }
-    }
 
     statuses[appId] = newStatus;
     await saveAppStatuses(statuses);
@@ -178,7 +162,6 @@ router.get('/:appId/files', async (req, res) => {
             size: stats.size,
             created: stats.birthtime,
             modified: stats.mtime,
-            download_url: buildDownloadUrl(appId, file)
           };
         })
       );

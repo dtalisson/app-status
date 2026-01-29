@@ -67,9 +67,8 @@ router.post('/:appId', upload.single('file'), async (req, res) => {
     }
 
     const filename = req.file.filename;
-    const downloadUrl = `${getBaseUrl()}/downloads/${appId}/${filename}`;
 
-    // Atualizar status da aplicação com nova URL de download
+    // Atualizar status da aplicação
     const statuses = await loadAppStatuses();
     const currentStatus = statuses[appId] || { ...APPS[appId].defaultStatus };
     
@@ -80,7 +79,6 @@ router.post('/:appId', upload.single('file'), async (req, res) => {
     // Atualizar status
     statuses[appId] = {
       ...currentStatus,
-      download_url: downloadUrl,
       current_version: detectedVersion || currentStatus.current_version,
       message: `Nova versão disponível: ${filename}`
     };
@@ -96,7 +94,6 @@ router.post('/:appId', upload.single('file'), async (req, res) => {
     res.json({
       success: true,
       filename: filename,
-      downloadUrl: downloadUrl,
       size: req.file.size,
       status: statuses[appId]
     });
