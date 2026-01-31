@@ -55,6 +55,20 @@ const APPS = {
       message_offline: 'Aplicação offline para atualização.',
       message_update_required: 'Nova versão disponível. Atualize o aplicativo.'
     }
+  },
+  'syntraspoofer': {
+    id: 'syntraspoofer',
+    name: 'SyntraSpoofer',
+    defaultStatus: {
+      status: 'online',
+      current_version: '1.0.0',
+      min_version: '1.0.0',
+      maintenance: false,
+      message: 'Aplicação está online e atualizada.',
+      message_online: 'Aplicação está online e atualizada.',
+      message_offline: 'Aplicação offline para atualização.',
+      message_update_required: 'Nova versão disponível. Atualize o aplicativo.'
+    }
   }
 };
 

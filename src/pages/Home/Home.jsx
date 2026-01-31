@@ -9,6 +9,7 @@ const applications = [
   { id: 'valorant-aimbot-color', key: 'valorant-aimbot-color', label: 'Valorant Aimbot Color' },
   { id: 'cs2-elevate', key: 'cs2-elevate', label: 'Counter Strike 2 Elevate' },
   { id: 'vgc-bypass', key: 'vgc-bypass', label: 'VGC Bypass' },
+  { id: 'syntraspoofer', key: 'syntraspoofer', label: 'SyntraSpoofer' },
 ];
 
 const Home = () => {

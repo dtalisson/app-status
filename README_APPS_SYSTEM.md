@@ -10,6 +10,7 @@ Sistema completo para gerenciar status, versões e downloads de múltiplas aplic
 2. **valorant-aimbot-color** → "Valorant Aimbot Color"
 3. **cs2-elevate** → "Counter Strike 2 Elevate"
 4. **vgc-bypass** → "VGC Bypass"
+5. **syntraspoofer** → "SyntraSpoofer"
 
 ### Estrutura de Pastas
 
@@ -19,7 +20,8 @@ downloads/
   │   └── SlottedAimbot-v1.1.0.exe
   ├── valorant-aimbot-color/
   ├── cs2-elevate/
-  └── vgc-bypass/
+  ├── vgc-bypass/
+  └── syntraspoofer/
 ```
 
 ## 🔌 API Endpoints
@@ -169,6 +171,7 @@ mkdir -p downloads/slottedaimbot
 mkdir -p downloads/valorant-aimbot-color
 mkdir -p downloads/cs2-elevate
 mkdir -p downloads/vgc-bypass
+mkdir -p downloads/syntraspoofer
 ```
 
 ## 📝 Notas Importantes
